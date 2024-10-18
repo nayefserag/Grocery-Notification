@@ -1,40 +1,53 @@
-import {
-  Injectable,
-  ConflictException,
-  UnauthorizedException,
-  NotFoundException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
-import {
-  comparePassword,
-  hashPassword,
-} from 'src/app/shared/utils/hash.helper';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { ForgotPasswordDto } from '../model/forget-password.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { EmailService } from '../../../../shared/module/mailer/email.service';
-import { TokenService } from 'src/app/module/strategies/jwt.service';
 import { CompleteUserDto } from '../model/complete-user.dto';
-
-// import { config } from 'src/app/shared/module/config-module/config-module.service';
 
 @Injectable()
 export class UserEmailsService {
-  constructor(private readonly mailerService: EmailService) {
-    let logger = new Logger();
-    logger.log('UserEmailsService created', UserEmailsService.name);
+  private readonly logger = new Logger(UserEmailsService.name);
+
+  constructor(private readonly mailerService: EmailService) {}
+  private async sendEmail(
+    emailType: 'forgotPassword' | 'completeRegistration',
+    dto: ForgotPasswordDto | CompleteUserDto,
+    dynamicValue?: string,
+  ) {
+    try {
+      // Call the generic email sending method from EmailService
+      await this.mailerService.sendTemplateEmail(
+        dto.email,
+        emailType === 'forgotPassword'
+          ? 'Reset Your Password'
+          : 'Complete Your Registration',
+        emailType,
+        dynamicValue || '',
+      );
+
+      this.logger.log(`${emailType} email sent to ${dto.email}`);
+
+      return {
+        message: `${emailType === 'forgotPassword' ? 'Password reset link' : 'Registration completion email'} has been sent to ${dto.email}`,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to send ${emailType} email to ${dto.email}`,
+        error.stack,
+      );
+      throw new BadRequestException(
+        `Unable to send ${emailType === 'forgotPassword' ? 'password reset' : 'registration'} email. Please try again later.`,
+      );
+    }
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
-    await this.mailerService.sendForgotPasswordEmail(forgotPasswordDto);
-    return {
-      message: `Password reset link has been sent to ${forgotPasswordDto.email}`,
-    };
+    return this.sendEmail('forgotPassword', forgotPasswordDto);
   }
-  async sendCompleteRegistrationEmail(body:CompleteUserDto) {
-    await this.mailerService.sendCompleteRegistrationEmail(body);
-    return {
-      message: `Email has been sent to ${body.email}`,
-    };
+  async sendCompleteRegistrationEmail(completeUserDto: CompleteUserDto) {
+    return this.sendEmail(
+      'completeRegistration',
+      completeUserDto,
+      completeUserDto.id,
+    );
   }
 }
