@@ -1,9 +1,10 @@
-import { Module } from "@nestjs/common";
-import { RabbitMQPublisher } from "./rabbit-mq-publisher";
+import { Module } from '@nestjs/common';
+import { RabbitMQPublisher } from './rabbit-mq-publisher';
+import { UserEmailsService } from '../module/application/user-emails/services/user-emails.service';
 
 @Module({
-    providers: [RabbitMQPublisher],
-    exports: [RabbitMQPublisher],
-    imports: [RabbitMQPublisher],
+  providers: [RabbitMQPublisher, UserEmailsService],
+  exports: [RabbitMQPublisher],
+  imports: [RabbitMQPublisher],
 })
 export class RabbitMQModule {}
