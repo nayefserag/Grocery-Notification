@@ -1,73 +1,167 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+## Part Of Grocery Microservices App
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+# Notification Service
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This service is responsible for sending email notifications as part of a microservices-based architecture. It listens for events (such as email verification, password resets, order confirmations) via RabbitMQ queues and communicates with other services through HTTP calls and RabbitMQ.
 
-## Description
+## Key Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Email Notifications**: Sends emails for user-related events like password reset, registration confirmation, and more.
+- **RabbitMQ Integration**: Consumes messages from RabbitMQ queues for event-driven email sending.
+- **Inter-Service Communication**: This service communicates with other microservices via:
+  1. **RabbitMQ** for asynchronous message exchange.
+  2. **HTTP calls** for synchronous requests and responses between services.
+- **Template-Based Emails**: Utilizes HTML templates for emails, making the content customizable and dynamic.
+- **Microservice Architecture**: The service is independently scalable and interacts with other services in the ecosystem.
+- **Logging and Error Tracking**: Uses **Winston** for structured logging and **Sentry** for tracking errors in production environments.
 
-## Installation
+## Table of Contents
 
-```bash
-$ npm install
+1. [Technologies Used](#technologies-used)
+2. [File Structure](#file-structure)
+3. [Message Queue Integration](#message-queue-integration)
+4. [HTTP Communication](#http-communication)
+5. [Email Templates](#email-templates)
+6. [Running the Service](#running-the-service)
+7. [Endpoints](#endpoints)
+8. [Development](#development)
+
+---
+
+### Technologies Used
+
+- **NestJS**: Framework for building efficient, scalable server-side applications.
+- **RabbitMQ**: For message queueing and asynchronous event handling.
+- **Nodemailer**: A popular module for sending emails.
+- **MySQL**: Database for storing user-related information.
+- **TypeORM**: ORM for database operations.
+- **TypeScript**: For static typing and better developer experience.
+- **Winston**: A logging library for structured logs.
+- **Sentry**: Error tracking to monitor the service's health.
+
+### File Structure
+
+```plaintext
+src/
+├── app/
+│   ├── api/
+│   │   ├── user-emails/                 # Controller for handling user-related email requests
+│   ├── application/
+│   │   ├── user-emails/
+│   │   │   ├── model/                   # DTOs for user email actions
+│   │   │   ├── services/                # Business logic for email sending
+│   ├── rabbitMQ/                        # RabbitMQ consumers and connectors
+│   ├── shared/
+│   │   ├── mailer/                      # Nodemailer configuration and email templates
+├── config/                              # Environment-specific configurations
+├── templates/                           # HTML templates for email notifications
+├── main.ts                              # Application entry point
 ```
 
-## Running the app
+### Message Queue Integration
 
-```bash
-# development
-$ npm run start
+The service uses **RabbitMQ** to consume messages from different queues and process the events accordingly. It listens to queues such as:
 
-# watch mode
-$ npm run start:dev
+- `EMAIL_VERIFICATION_QUEUE`: Handles sending email verification messages.
+- `ORDER_QUEUE`: Handles order-related notifications.
 
-# production mode
-$ npm run start:prod
-```
+When a message is received on these queues, the service processes it and sends an email through **Nodemailer** based on the type of event.
 
-## Test
+#### RabbitMQ Consumers
+The consumers for the RabbitMQ queues are defined in `src/app/rabbitMQ/consumers/`. Each consumer listens to a specific queue and delegates email-sending tasks to the service.
 
-```bash
-# unit tests
-$ npm run test
+### HTTP Communication
 
-# e2e tests
-$ npm run test:e2e
+In addition to RabbitMQ, this service can also communicate with other services through **HTTP calls**. This synchronous communication is useful for scenarios that require immediate confirmation or response between services.
 
-# test coverage
-$ npm run test:cov
-```
+For example:
+- Triggering specific actions in another service after sending an email.
+- Requesting information from another service to customize the email content.
 
-## Support
+This dual communication strategy provides flexibility, allowing both asynchronous and synchronous inter-service interactions.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Email Templates
 
-## Stay in touch
+The email content is dynamically generated using pre-defined HTML templates stored in `src/templates/`. These templates are used for:
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- Registration confirmation.
+- Password reset requests.
+- Order confirmation, etc.
 
-## License
+Example template files:
 
-Nest is [MIT licensed](LICENSE).
+- `complete-registration.template.html`: Used for registration confirmation emails.
+- `forgot-password.template.html`: Used for password reset emails.
+- `order-created.template.html`: Used for notifying users about order creation.
+
+### Running the Service
+
+#### Prerequisites
+
+- **Node.js**
+- **RabbitMQ**
+- **MySQL**
+- **Docker** (optional)
+
+#### Steps:
+
+1. Install dependencies:
+    ```bash
+    npm install
+    ```
+
+2. Set up environment variables (e.g., `.env`):
+    ```plaintext
+    DATABASE_URL=mysql://user:password@localhost:3306/notification_service
+    RABBITMQ_URL=amqp://localhost
+    EMAIL_VERIFICATION_QUEUE=email_verification_queue
+    ORDER_QUEUE=order_queue
+    SMTP_HOST=smtp.yourprovider.com
+    SMTP_PORT=587
+    SMTP_USER=your_email@example.com
+    SMTP_PASS=your_password
+    ```
+
+3. Run the service:
+    ```bash
+    npm start
+    ```
+
+4. To run the service in development mode with file watching:
+    ```bash
+    npm run start:dev
+    ```
+
+### Endpoints
+
+The service provides a REST API to send different types of emails:
+
+#### User Emails:
+
+- **POST** `/user-emails/send-email`
+    - Sends an email based on the type (`forgotPassword` or `completeRegistration`).
+    - **Body Parameters:**
+      - `emailType`: The type of email to send (`forgotPassword` or `completeRegistration`).
+      - `dto`: The DTO containing user details and email content.
+
+### Development
+
+- **Testing**: Unit tests and e2e tests are written using Jest.
+    ```bash
+    npm run test
+    ```
+
+- **Linting**: Ensure code quality with ESLint.
+    ```bash
+    npm run lint
+    ```
+
+- **Docker**: If you are using Docker for local development, you can create a `Dockerfile` and build the service as a Docker image.
+
+    ```bash
+    docker build -t notification-service .
+    ```
+
+---
+
+This README explains the purpose of the notification service, the inter-service communication mechanisms, and how to set it up and run it locally.
