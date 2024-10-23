@@ -68,19 +68,21 @@ export class EmailService {
   async sendTemplateEmail(
     to: string,
     subject: string,
-    type: 'forgotPassword' | 'completeRegistration' | 'otpVerification',
+    type: 'forgotPassword' | 'completeRegistration' | 'otpVerification' | 'orderDetails',
     dynamicValue: string,
   ): Promise<void> {
     const templateMap = {
       forgotPassword: 'forgot-password.template.html',
       completeRegistration: 'complete-registration.template.html',
       otpVerification: 'otp-verification.template.html',
+      orderDetails: 'order-created.template.html',
     };
 
     const urlMap = {
       forgotPassword: `${config.getString('FRONTEND_URL')}/reset-password`,
       completeRegistration: `${config.getString('FRONTEND_URL')}/complete-registration/${dynamicValue}`,
       otpVerification: `${config.getString('FRONTEND_URL')}/verify-email/${dynamicValue}`,
+      orderDetails: `${config.getString('FRONTEND_URL')}/order-details/${dynamicValue}`,
     };
 
     const templateName = templateMap[type];

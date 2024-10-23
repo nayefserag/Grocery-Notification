@@ -16,15 +16,15 @@ async function bootstrap() {
   });
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, 
-      forbidNonWhitelisted: true, 
+      whitelist: true,
+      forbidNonWhitelisted: true,
       transform: true,
     }),
   );
   const connectionUrl = Connector.getConnectionUrl();
-Logger.log(`Connecting to RabbitMQ with URL: ${connectionUrl}`);
-const queueName = config.getString('EMAIL_VERIFICATION_QUEUE');
-Logger.log(`Listening on RabbitMQ queue: ${queueName}`);
+  Logger.log(`Connecting to RabbitMQ with URL: ${connectionUrl}`);
+  const queueName = config.getString('EMAIL_VERIFICATION_QUEUE');
+  Logger.log(`Listening on RabbitMQ queue: ${queueName}`);
 
   app.connectMicroservice({
     strategy: new RabbitMQConsumer(
@@ -33,6 +33,18 @@ Logger.log(`Listening on RabbitMQ queue: ${queueName}`);
         prefetchCount: config.getNumber('RABBITMQ_PREFETCH_COUNT'),
         queue: {
           name: config.getString('EMAIL_VERIFICATION_QUEUE'),
+        },
+      },
+      app.get(UserEmailsService),
+    ),
+  });
+  app.connectMicroservice({
+    strategy: new RabbitMQConsumer(
+      {
+        url: Connector.getConnectionUrl(),
+        prefetchCount: config.getNumber('RABBITMQ_PREFETCH_COUNT'),
+        queue: {
+          name: config.getString('ORDER_QUEUE'),
         },
       },
       app.get(UserEmailsService),
