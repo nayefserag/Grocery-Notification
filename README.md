@@ -163,5 +163,3 @@ The service provides a REST API to send different types of emails:
     ```
 
 ---
-
-This README explains the purpose of the notification service, the inter-service communication mechanisms, and how to set it up and run it locally.
