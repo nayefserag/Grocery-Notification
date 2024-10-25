@@ -3,7 +3,7 @@
 <h1 align="center">Grocery Notification Service</h1>
 <p align="center">
   <a href="http://nestjs.com/" target="blank">
-    <img src="logo.jpg" width="400" alt="Nest Logo" style="border-radius: 15px;" />
+    <img src="logo.jpg" width="500" alt="Nest Logo" style="border-radius: 15px;" />
   </a>
 </p>
 
