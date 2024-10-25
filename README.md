@@ -1,6 +1,6 @@
 ## Part Of Grocery Microservices App
 
-# Notification Service
+# Grocery Notification Service
 
 This service is responsible for sending email notifications as part of a microservices-based architecture. It listens for events (such as email verification, password resets, order confirmations) via RabbitMQ queues and communicates with other services through HTTP calls and RabbitMQ.
 
@@ -42,20 +42,82 @@ This service is responsible for sending email notifications as part of a microse
 ### File Structure
 
 ```plaintext
-src/
-├── app/
-│   ├── api/
-│   │   ├── user-emails/                 # Controller for handling user-related email requests
-│   ├── application/
-│   │   ├── user-emails/
-│   │   │   ├── model/                   # DTOs for user email actions
-│   │   │   ├── services/                # Business logic for email sending
-│   ├── rabbitMQ/                        # RabbitMQ consumers and connectors
-│   ├── shared/
-│   │   ├── mailer/                      # Nodemailer configuration and email templates
-├── config/                              # Environment-specific configurations
-├── templates/                           # HTML templates for email notifications
-├── main.ts                              # Application entry point
+.
+|-- README.md        
+|-- combined.log     
+|-- error.log        
+|-- nest-cli.json    
+|-- package-lock.json
+|-- package.json     
+|-- src
+|   |                               `-- app
+|   |   |                           `-- module
+|   |   |   |                       `-- api
+|   |   |   |   |                   `-- api.module.ts
+|   |   |   |                       `-- user-emails
+|   |   |   |       |               `-- controller
+|   |   |   |       |               `-- user-emails.controller.ts
+|   |   |   |       `-- user-emails.module.ts
+|   |   |   |-- application
+|   |   |   |   |-- application.module.ts
+|   |   |   |   |-- shared
+|   |   |   |   `-- user-emails
+|   |   |   |       |-- model
+|   |   |   |       |   |           `-- complete-user.dto.ts
+|   |   |   |       |   |           `-- forget-password.dto.ts
+|   |   |   |       |   |           `-- order.dto.ts
+|   |   |   |       |               `-- otp-verification.dto.ts
+|   |   |   |       `-- services
+|   |   |   |                       `-- user-emails.service.ts
+|   |   |   |-- infrastructure
+|   |   |   |   |-- entities
+|   |   |   |   |   `-- general
+|   |   |   |   |                   `-- user.entity.ts
+|   |   |   |   |-- infrastructure.module.ts
+|   |   |   |   `-- repositories
+|   |   |   |       `-- auth
+|   |   |   |                       `-- auth.repository.ts
+|   |   |   `-- strategies
+|   |   |       |-- jwt.guard.ts
+|   |   |       |-- jwt.service.ts
+|   |   |       `-- strategies.ts
+|   |   |-- rabbitMQ
+|   |   |   |-- connector.ts
+|   |   |   |-- consumer-options.ts
+|   |   |   |-- consumers
+|   |   |   |   `-- order.consumer.ts
+|   |   |   |-- exchange.definition.ts
+|   |   |   |-- queue-consumer.decorator.ts
+|   |   |   |-- queue.difinition.ts
+|   |   |   |-- rabbit-mq-consumer.ts
+|   |   |   |-- rabbit-mq-publisher.ts
+|   |   |   `-- rabbit-mq.module.ts
+|   |   `-- shared
+|   |       |-- interfaces
+|   |       |   `-- IEnvConfigInterface.ts
+|   |       |-- mailer
+|   |       |-- module
+|   |       |   |-- config-module
+|   |       |   |   |-- config.module.ts
+|   |       |   |   |-- config.service.ts
+|   |       |   |   `-- email-config.service.ts
+|   |       |   `-- mailer
+|   |       |       `-- email.service.ts
+|   |       |-- templates
+|   |       |   |-- complete-registration.template.html
+|   |       |   |-- forgot-password.template.html
+|   |       |   |-- order-created.template.html
+|   |       |   `-- otp-verification.template.html
+|   |       `-- utils
+|   |           `-- hash.helper.ts
+|   |-- app.module.ts
+|   `-- main.ts
+|-- test
+|   |-- app.e2e-spec.ts
+|   `-- jest-e2e.json
+|-- tsconfig.build.json
+`-- tsconfig.json
+
 ```
 
 ### Message Queue Integration
