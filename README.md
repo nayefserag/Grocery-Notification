@@ -1,6 +1,13 @@
 ## Part Of Grocery Microservices App
 
-# Grocery Notification Service
+<h1 align="center">Grocery Notification Service</h1>
+<p align="center">
+  <a href="http://nestjs.com/" target="blank">
+    <img src="logo.jpg" width="400" alt="Nest Logo" style="border-radius: 15px;" />
+  </a>
+</p>
+
+
 
 This service is responsible for sending email notifications as part of a microservices-based architecture. It listens for events (such as email verification, password resets, order confirmations) via RabbitMQ queues and communicates with other services through HTTP calls and RabbitMQ.
 
